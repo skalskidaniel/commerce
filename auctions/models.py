@@ -7,19 +7,19 @@ class User(AbstractUser):
     pass
 
 class Listing(models.Model):
-    CATEGORIES = [
-        ('electronics', 'Electronics'),
-        ('fashion', 'Fashion'),
-        ('house_garden', 'House & Garden'),
-        ('babies', 'Babies'),
-        ('beauty', 'Beauty'),
-        ('health', 'Health'),
-        ('culture_entertainment', 'Culture and Entertainment'),
-        ('sports_hobby', 'Sports and Hobby'),
-        ('cars', 'Cars'),
-        ('real_estates', 'Real Estates'),
-        ('services', 'Services'),
-    ]
+    CATEGORIES = {
+    'electronics': 'Electronics',
+    'fashion': 'Fashion',
+    'house_garden': 'House & Garden',
+    'babies': 'Babies',
+    'beauty': 'Beauty',
+    'health': 'Health',
+    'culture_entertainment': 'Culture and Entertainment',
+    'sports_hobby': 'Sports and Hobby',
+    'cars': 'Cars',
+    'real_estates': 'Real Estates',
+    'services': 'Services',
+    }
     
     id = models.AutoField(primary_key=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -31,7 +31,7 @@ class Listing(models.Model):
     category = models.CharField(max_length=32, choices=CATEGORIES, default='electronics')
     
     def __str__(self):
-        return f"ADDED AT: {self.addition_time} BY: {self.author.username}\nTITLE:\n{self.title}\nCATEGORY:{self.category}\nDESCRIPTION:\n{self.description}\nSTARTING BID: {self.starting_bid}\nIMAGE: {self.image}\n"
+        return f"ID: {self.id} ADDED AT: {self.addition_time} BY: {self.author.username}\nTITLE:\n{self.title}\nCATEGORY: {self.category}\nDESCRIPTION:\n{self.description}\nSTARTING BID: {self.starting_bid}\nIMAGE: {self.image}\n"
 
 class Bid(models.Model):
     pass

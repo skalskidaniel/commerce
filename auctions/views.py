@@ -73,7 +73,8 @@ def create_listing(request):
         image = request.POST.get('image', None)
         category = request.POST['category']
         
-        listing = Listing(author=author, 
+        listing = Listing(author=author,
+                          title=title,
                           description=description, 
                           starting_bid=starting_bid, 
                           image=image, 
@@ -87,3 +88,16 @@ def create_listing(request):
         'Listing': Listing,
         }
         return render(request, 'auctions/create_listing.html', context)
+    
+def view_listing(request, ID):
+    listing = Listing.objects.get(id=ID)
+    
+    return render(request, 'auctions/view_listing.html', {
+        'title' : listing.title,
+        'category' : Listing.CATEGORIES[listing.category],
+        'author' : listing.author,
+        'time' : listing.addition_time,
+        'image' : listing.image,
+        'bid' : listing.starting_bid,
+        'description' : listing.description
+    })

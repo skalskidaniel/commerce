@@ -1,0 +1,29 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<div class="container mt-5">
+    <!-- Listing Title -->
+    <div class="mb-4">
+        <h2 class="display-4">{{ title }}</h2>
+        <h6 class="text-muted">{{ category }}</h6>
+        <h6 class="text-muted">Listed by {{ author }} on {{ time }}</h6>
+    </div>
+
+    <!-- Listing Image -->
+    {% if image %}
+    <div class="mb-4 text-center">
+        <img src="{{ image }}" alt="{{ title }}" class="img-fluid rounded">
+    </div>
+    {% endif %}
+
+    <!-- Current Bid -->
+    <div class="mb-4">
+        <h3 class="font-weight-bold">Current bid: ${{ bid }}</h3>
+    </div>
+
+    <!-- Listing Description -->
+    <div class="mb-4">
+        <p class="lead">{{ description }}</p>
+    </div>
+</div>
+{% endblock %}
