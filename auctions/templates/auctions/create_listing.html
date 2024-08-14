@@ -1,0 +1,19 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<form action="/createlisting" method="POST">
+    {% csrf_token %}
+    Title<br><input class="input-text" type="text" id="title" name="title" maxlength="64"><br>
+    Category<br><select id="category" name="category">
+                    {% for key, value in Listing.CATEGORIES %}
+                    <option value="{{ key }}">{{ value }}</option>
+                    {% empty %}
+                    <option>No categories available</option>
+                    {% endfor %}
+                </select><br>
+    Description<br><textarea class="input-textarea" id="description" name="description" maxlength="8000"></textarea><br>
+    Starting Bid<br><input class="input-text" type="number" min="0" value="0" id="starting_bid" name="starting_bid"><br>
+    Link to image (recommended)<br><input class="input-text" type="url" id="image" name="image"><br>
+    <button type="submit">Submit</button>
+</form>
+{% endblock %}
