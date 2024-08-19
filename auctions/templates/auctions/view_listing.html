@@ -4,6 +4,17 @@
 <div class="container mt-5">
     <!-- Listing Title -->
     <div class="mb-4">
+        <!-- Watchlist Button -->
+        {% if user.is_authenticated %}
+        <form action="{% url 'watchlist_toggle' listing_id %}" method="post">
+            {% csrf_token %}
+            {% if in_watchlist %}
+            <button type="submit" class="btn btn-danger">Remove from Watchlist</button>
+            {% else %}
+            <button type="submit" class="btn btn-success">Add to Watchlist</button>
+            {% endif %}
+        </form>
+        {% endif %}
         <h2 class="display-4">{{ title }}</h2>
         <h6 class="text-muted">{{ category }}</h6>
         <h6 class="text-muted">Listed by {{ author }} on {{ time }}</h6>
@@ -19,6 +30,22 @@
     <!-- Current Bid -->
     <div class="mb-4">
         <h3 class="font-weight-bold">Current bid: ${{ bid }}</h3>
+        <!-- Place Bid button -->
+        {% if user.is_authenticated %}
+        <form action="{% url 'place_bid' listing_id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="value">Your bid:</label>
+                <input type="number" class="form-control" id="bid_value" name="bid_value" min="0" value="0" required>
+                <button type="submit" class="btn btn-primary">Place Bid</button>
+            </div>
+        </form>
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+        {% endif %}
     </div>
 
     <!-- Listing Description -->
