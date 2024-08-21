@@ -68,6 +68,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
 @login_required
 def create_listing(request):
     if request.method == "POST":
@@ -94,6 +95,20 @@ def create_listing(request):
         }
         return render(request, 'auctions/create_listing.html', context)
     
+    
+@login_required
+def close_listing(request, listing_id):
+    if request.method == "POST":
+        listing = Listing.objects.get(id=listing_id)
+        listing.is_active = False
+        if listing.current_bid != 0:
+            highest_bid = Bid.objects.get(listing=listing, value=listing.current_bid)
+            listing.winner = highest_bid.author
+        listing.save()
+        
+        return HttpResponseRedirect(reverse('view_listing', args=[listing_id]))
+    
+    
 def view_listing(request, listing_id, error_message=None):
     listing = Listing.objects.get(id=listing_id)
     comments = Comment.objects.filter(listing=listing).order_by('-addition_time')
@@ -115,6 +130,15 @@ def view_listing(request, listing_id, error_message=None):
         'error_message': error_message  # Pass the error message to the template
     })
     
+
+@login_required
+def user_listings(request):
+    listings = Listing.objects.filter(author=request.user)
+    
+    return render(request, 'auctions/user_listings.html', {
+        'listings' : listings
+    })
+    
     
 def show_categories(request):
     categories = Listing.CATEGORIES
@@ -122,6 +146,7 @@ def show_categories(request):
     return render(request, 'auctions/categories_all.html', {
         'categories' : categories
     })
+        
         
 def category_listings(request, category_name):
     listings = Listing.objects.filter(category=category_name, is_active=True)
@@ -131,6 +156,7 @@ def category_listings(request, category_name):
         'listings' : listings
     })
     
+    
 @login_required
 def watchlist(request):
     watchlist = request.user.watchlist.all()
@@ -138,6 +164,7 @@ def watchlist(request):
     return render(request, "auctions/watchlist.html", {
         'watchlist' : watchlist
     })
+    
     
 @login_required
 def watchlist_toggle(request, listing_id):
@@ -150,6 +177,7 @@ def watchlist_toggle(request, listing_id):
         user.watchlist.add(listing)
 
     return redirect('view_listing', listing_id=listing_id)
+
 
 @login_required
 def place_bid(request, listing_id):
@@ -168,18 +196,7 @@ def place_bid(request, listing_id):
 
         return HttpResponseRedirect(reverse('view_listing', args=[listing_id]))
     
-@login_required
-def close_listing(request, listing_id):
-    if request.method == "POST":
-        listing = Listing.objects.get(id=listing_id)
-        listing.is_active = False
-        if listing.current_bid != 0:
-            highest_bid = Bid.objects.get(listing=listing, value=listing.current_bid)
-            listing.winner = highest_bid.author
-        listing.save()
-        
-        return HttpResponseRedirect(reverse('view_listing', args=[listing_id]))
-    
+
 @login_required
 def add_comment(request, listing_id):
     author = request.user
@@ -192,11 +209,3 @@ def add_comment(request, listing_id):
     comment.save()
     
     return HttpResponseRedirect(reverse('view_listing', args=[listing_id]))
-
-@login_required
-def user_listings(request):
-    listings = Listing.objects.filter(author=request.user)
-    
-    return render(request, 'auctions/user_listings.html', {
-        'listings' : listings
-    })
