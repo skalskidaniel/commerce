@@ -1,0 +1,15 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<div class="container mt-4">
+    <h2 class="mb-4">Select a category:</h2>
+
+    <div class="list-group">
+        {% for key, value in categories.items %}
+        <a href="category/{{ key }}" class="list-group-item list-group-item-action">
+            {{ value }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

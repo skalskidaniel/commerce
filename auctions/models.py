@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 class User(AbstractUser):
     watchlist = models.ManyToManyField('Listing', related_name='watched_by', blank=True)
 
+
 class Listing(models.Model):
     CATEGORIES = {
     'electronics': 'Electronics',
@@ -23,29 +24,36 @@ class Listing(models.Model):
     }
     
     id = models.AutoField(primary_key=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_listings')
     title = models.CharField(max_length=64)
     description = models.TextField(max_length=8000)
     starting_bid = models.PositiveIntegerField(default=0)
-    current_bid = models.PositiveBigIntegerField(default=0)
+    current_bid = models.PositiveIntegerField(default=0)
     addition_time = models.DateTimeField(default=timezone.now)
     image = models.URLField(default=None, blank=True, null=True)
     category = models.CharField(max_length=32, choices=CATEGORIES, default='electronics')
     is_active = models.BooleanField(default=True)
+    winner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='won_auctions', default=None, blank=True, null=True)
     
     def __str__(self):
-        return f"ID: {self.id} ADDED AT: {self.addition_time} BY: {self.author.username}\nTITLE:\n{self.title}\nCATEGORY: {self.category}\nDESCRIPTION:\n{self.description}\nSTARTING BID: {self.starting_bid}\nIMAGE: {self.image}\n"
-
+        return f"ID: {self.id} DATE: {self.addition_time.date()} BY: {self.author.username}\nTITLE: {self.title}\n"
+    
+    
 class Bid(models.Model):
     id = models.AutoField(primary_key=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    addition_time = models.DateTimeField(default=timezone.now)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, default=1)
     value = models.PositiveIntegerField(default=0)
     
     def clean(self):
-        if self.value <= self.listing.starting_bid:
+        if self.value < self.listing.starting_bid:
             raise ValidationError({
                 'value': f'Bid value must be greater or equal to the starting bid of {self.listing.starting_bid}.'
+            })
+        elif self.value <= self.listing.current_bid:
+            raise ValidationError({
+                'value': f'Bid value must be greater than current bid of {self.listing.current_bid}.'
             })
             
     def save(self, *args, **kwargs):
@@ -55,14 +63,15 @@ class Bid(models.Model):
         self.listing.save()
         
     def __str__(self):
-        return f"Bid by: {self.author.username} on listing {self.listing.title} with value {self.value}"
+        return f"LISTING ID: {self.listing.id} DATE: {self.addition_time.date()} BY: {self.author.username} VALUE: {self.value}"
+    
     
 class Comment(models.Model):
     id = models.AutoField(primary_key=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    addition_time = models.DateTimeField(default=timezone.now)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField(max_length=1000)
-    likes = models.PositiveIntegerField(default=0)
         
     def __str__(self) -> str:
-        return f"Comment by: {self.author.username}\n{self.content}\n"
+        return f"LISTING ID: {self.listing.id} DATE: {self.addition_time.date()} BY: {self.author.username}"

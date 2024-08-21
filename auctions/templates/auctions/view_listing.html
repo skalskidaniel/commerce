@@ -2,6 +2,19 @@
 
 {% block body %}
 <div class="container mt-5">
+    <!-- Listing activity and winner checking -->
+    <div class="mb-4">
+        {% if not active %}
+        <div class="alert alert-warning text-center" role="alert">
+            <h2 class="display-5 font-weight-bold">Warning! This listing has been closed.</h2>
+        </div>
+        {% endif %}
+        {% if winner == user %}
+        <div class="alert alert-success text-center" role="alert">
+            <h2 class="display-5 font-weight-bold">Congratulations! You are the winner of this auction!</h2>
+        </div>
+        {% endif %}
+    </div>
     <!-- Listing Title -->
     <div class="mb-4">
         <!-- Watchlist Button -->
@@ -30,8 +43,17 @@
     <!-- Current Bid -->
     <div class="mb-4">
         <h3 class="font-weight-bold">Current bid: ${{ bid }}</h3>
+        <!-- Close auction button -->
+        {% if user.is_authenticated and author == user and active %}
+        <form action="{% url 'close_listing' listing_id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <button type="submit" class="btn-primary">Close listing</button>
+            </div>
+        </form>
+        {% endif %}
         <!-- Place Bid button -->
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and active %}
         <form action="{% url 'place_bid' listing_id %}" method="post">
             {% csrf_token %}
             <div class="form-group">
@@ -51,6 +73,39 @@
     <!-- Listing Description -->
     <div class="mb-4">
         <p class="lead">{{ description }}</p>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="mb-4">
+        <h3 class="font-weight-bold">Comments</h3>
+        {% if comments %}
+        <ul class="list-unstyled">
+            {% for comment in comments %}
+            <li class="media mb-3">
+                <div class="media-body">
+                    <h5 class="mt-0 mb-1">{{ comment.author.username }}</h5>
+                    <small class="text-muted">{{ comment.addition_time }}</small>
+                    <p>{{ comment.content }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No comments yet. Be the first to comment!</p>
+        {% endif %}
+    
+        {% if user.is_authenticated %}
+        <form action="{% url 'add_comment' listing_id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="content">Add a comment:</label>
+                <textarea class="form-control" id="content" name="content" rows="3" maxlength="1000" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        {% else %}
+        <p><a href="{% url 'login' %}">Log in</a> to leave a comment.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
